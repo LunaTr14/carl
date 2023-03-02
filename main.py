@@ -7,7 +7,7 @@ from random import random, randrange
 intents = Intents.default()
 intents.message_content = True
 
-app = commands.Bot(intents=intents,command_prefix="==>")
+app = commands.Bot(intents=intents,command_prefix="=>")
 
 CONFIG_FILE = os.path.abspath("./config.json")
 CONTENT_FILE = os.path.abspath("./data.json")
