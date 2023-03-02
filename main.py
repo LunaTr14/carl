@@ -1,38 +1,78 @@
 import os
-from json import load
+from json import load,dump
 from discord import Intents
 from discord.ext import commands
-import random
+from discord.ext.commands import Context
+from random import random, randrange
 intents = Intents.default()
 intents.message_content = True
 
-app = commands.Bot(intents=intents,command_prefix="=>")
+app = commands.Bot(intents=intents,command_prefix="==>")
 
-TOKEN_FILE = os.path.abspath("./config.json")
+CONFIG_FILE = os.path.abspath("./config.json")
+CONTENT_FILE = os.path.abspath("./data.json")
 
 def get_token(config_file : str) -> str:
     json_file = open(config_file,mode="r")
     token = load(json_file)["token"]
     json_file.close()
     return token
-    
-@app.command()
-async def sus(ctx):
-    await ctx.send("imposter ඞ")
 
 @app.command()
-async def rng(ctx):
-    rand_number = str(random.random())
+async def sus(ctx : Context) -> None:
+    user = str(ctx.author)
+    if(not is_json_valid(CONTENT_FILE) or not does_user_exist(user)):
+        write_content(CONTENT_FILE,{user:{"num_sus":1}})
+    else:
+        content = read_content(CONTENT_FILE)        
+        content[user]["num_sus"] = content[user]["num_sus"] + 1
+        write_content(CONTENT_FILE, content)
+    await ctx.send("imposter ඞ\n{user}: {amount}".format(user=user,amount=content[user]["num_sus"]))
+
+def does_user_exist(user : str):
+    if(user in read_content(CONTENT_FILE).keys()):
+        print(read_content(CONTENT_FILE).keys())
+        return True
+    return False
+
+@app.command()
+async def rng(ctx : Context) -> None:
+    rand_number = str(random())
     await ctx.send(rand_number)
 
 @app.command(name="flip-coin")
-async def flip_coin(ctx):
-    rand = random.randrange(0,2)
+async def flip_coin(ctx : Context) -> None:
+    rand = randrange(0,2)
     if(rand == 1):
         await ctx.send("HEADS")
     elif (rand == 0):
         await ctx.send("TAILS")
 
+def read_content(file_path : str) -> dict:
+    content_file = open(file=file_path,mode="r")
+    data = load(content_file)
+    content_file.close()
+    return data
+
+def write_content(file_path : str,data : dict) -> None:
+    content_file = open(file=CONTENT_FILE,mode="w")
+    dump(data,content_file)
+    content_file.close()
+
+def is_json_valid(file_path : str) -> bool:
+    try:
+        f = open(file_path,mode="r")
+        load(f)
+        f.close()
+        return True
+    except:
+        return False
+
 if __name__ == "__main__":
-    token = get_token(TOKEN_FILE)
+    if(not is_json_valid(CONTENT_FILE)):
+        write_content(CONTENT_FILE,{})
+    if(not is_json_valid(CONFIG_FILE)):
+        write_content(CONFIG_FILE,{})
+    
+    token = get_token(CONFIG_FILE)
     app.run(token)
