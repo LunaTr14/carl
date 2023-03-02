@@ -25,6 +25,14 @@ async def rng(ctx):
     rand_number = str(random.random())
     await ctx.send(rand_number)
 
+@app.command(name="flip-coin")
+async def flip_coin(ctx):
+    rand = random.randrange(0,2)
+    if(rand == 1):
+        await ctx.send("HEADS")
+    elif (rand == 0):
+        await ctx.send("TAILS")
+
 if __name__ == "__main__":
     token = get_token(TOKEN_FILE)
     app.run(token)
