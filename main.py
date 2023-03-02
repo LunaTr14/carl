@@ -23,8 +23,9 @@ async def sus(ctx : Context) -> None:
     user = str(ctx.author)
     if(not is_json_valid(CONTENT_FILE) or not does_user_exist(user)):
         write_content(CONTENT_FILE,{user:{"num_sus":1}})
+        content = read_content(CONTENT_FILE)
     else:
-        content = read_content(CONTENT_FILE)        
+        content = read_content(CONTENT_FILE)
         content[user]["num_sus"] = content[user]["num_sus"] + 1
         write_content(CONTENT_FILE, content)
     await ctx.send("imposter ඞ\n{user}: {amount}".format(user=user,amount=content[user]["num_sus"]))
