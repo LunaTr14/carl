@@ -4,37 +4,51 @@ from discord import Intents
 from discord.ext import commands
 from discord.ext.commands import Context
 from random import random, randrange
+from pathlib import Path
+
 intents = Intents.default()
 intents.message_content = True
 
-app = commands.Bot(intents=intents,command_prefix="=>")
+WORKDIR = os.path.abspath("./")
+class JsonParser():
+    _file_path = ""
+    def __init__(self, path: str) -> None:
+        self._file_path = path
+        if(not os.path.exists(path)):
+            self.create_empty_json()
+        
+    def read_content(self) -> dict:
+        content_file = open(file=self._file_path, mode="r")
+        data = load(content_file)
+        content_file.close()
+        return data
+    
+    def create_empty_json(self) -> None:
+        Path(self._file_path).touch()
+        self.write_content({})
+    
+    def write_content(self, data: dict) -> None:
+        content_file = open(file=self._file_path, mode="w")
+        dump(data, content_file)
+        content_file.close()
 
-CONFIG_FILE = os.path.abspath("./config.json")
-CONTENT_FILE = os.path.abspath("./data.json")
+    def _does_path_exist(self,path : str) -> bool:
+        return os.path.exists(path)
 
-def get_token(config_file : str) -> str:
-    json_file = open(config_file,mode="r")
-    token = load(json_file)["token"]
-    json_file.close()
-    return token
+data_file = JsonParser(f"{WORKDIR}/data.json")
+config_file = JsonParser(f"{WORKDIR}/config.json")
+app = commands.Bot(intents=intents,command_prefix="$")
 
 @app.command()
 async def sus(ctx : Context) -> None:
     user = str(ctx.author)
-    if(not is_json_valid(CONTENT_FILE) or not does_user_exist(user)):
-        write_content(CONTENT_FILE,{user:{"num_sus":1}})
-        content = read_content(CONTENT_FILE)
-    else:
-        content = read_content(CONTENT_FILE)
-        content[user]["num_sus"] = content[user]["num_sus"] + 1
-        write_content(CONTENT_FILE, content)
-    await ctx.send("imposter ඞ\n{user}: {amount}".format(user=user,amount=content[user]["num_sus"]))
-
-def does_user_exist(user : str):
-    if(user in read_content(CONTENT_FILE).keys()):
-        print(read_content(CONTENT_FILE).keys())
-        return True
-    return False
+    file_content = data_file.read_content()
+    number_of_sus = 1
+    if(user in file_content.keys()):
+        number_of_sus = file_content[user]["num_sus"] + 1
+    file_content[user] = {"num_sus":number_of_sus}
+    data_file.write_content(file_content)
+    await ctx.send("imposter ඞ\n{user}: {amount}".format(user=user,amount=file_content[user]["num_sus"]))
 
 @app.command()
 async def rng(ctx : Context) -> None:
@@ -49,31 +63,9 @@ async def flip_coin(ctx : Context) -> None:
     elif (rand == 0):
         await ctx.send("TAILS")
 
-def read_content(file_path : str) -> dict:
-    content_file = open(file=file_path,mode="r")
-    data = load(content_file)
-    content_file.close()
-    return data
-
-def write_content(file_path : str,data : dict) -> None:
-    content_file = open(file=CONTENT_FILE,mode="w")
-    dump(data,content_file)
-    content_file.close()
-
-def is_json_valid(file_path : str) -> bool:
-    try:
-        f = open(file_path,mode="r")
-        load(f)
-        f.close()
-        return True
-    except:
-        return False
-
+def get_token() -> str:
+    token = config_file.read_content()["token"]
+    return token
 if __name__ == "__main__":
-    if(not is_json_valid(CONTENT_FILE)):
-        write_content(CONTENT_FILE,{})
-    if(not is_json_valid(CONFIG_FILE)):
-        write_content(CONFIG_FILE,{})
-    
-    token = get_token(CONFIG_FILE)
+    token = get_token()
     app.run(token)
