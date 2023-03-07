@@ -5,7 +5,7 @@ from discord.ext import commands
 from discord.ext.commands import Context
 from random import random, randrange
 from pathlib import Path
-
+from asyncio import sleep
 intents = Intents.default()
 intents.message_content = True
 
@@ -38,6 +38,7 @@ class JsonParser():
 data_file = JsonParser(f"{WORKDIR}/data.json")
 config_file = JsonParser(f"{WORKDIR}/config.json")
 app = commands.Bot(intents=intents,command_prefix="$")
+is_bot_running = False
 
 @app.command()
 async def sus(ctx : Context) -> None:
@@ -66,6 +67,20 @@ async def flip_coin(ctx : Context) -> None:
 def get_token() -> str:
     token = config_file.read_content()["token"]
     return token
+
+async def send_croissant(channel_id : int) -> None:
+    await app.get_channel(channel_id).send("Are you gonna finish that __*CROISSANT*__")
+
+@app.event
+async def on_ready():
+    print("Bot is Running")
+    is_bot_running = True
+    channel_id = config_file.read_content()["croissant_channel"]
+    while(is_bot_running):
+        await send_croissant(channel_id)
+        time_delay = randrange(start=21600,stop=86400)
+        await sleep(time_delay)
+         
 if __name__ == "__main__":
     token = get_token()
     app.run(token)
