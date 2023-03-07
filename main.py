@@ -4,30 +4,25 @@ from discord import Intents
 from discord.ext import commands
 from discord.ext.commands import Context
 from random import random, randrange
+from pathlib import Path
 intents = Intents.default()
 intents.message_content = True
 
+WORKDIR = os.path.abspath("./")
 app = commands.Bot(intents=intents,command_prefix="=>")
-
-CONFIG_FILE = os.path.abspath("./config.json")
-CONTENT_FILE = os.path.abspath("./data.json")
 
 def get_token(config_file : str) -> str:
     json_file = open(config_file,mode="r")
 
-
 class JsonParser():
     _file_path = ""
-
     def __init__(self, path: str) -> None:
         self._file_path = path
-
     def read_content(self) -> dict:
         content_file = open(file=self._file_path, mode="r")
         data = load(content_file)
         content_file.close()
         return data
-
     def write_content(self, data: dict) -> None:
         content_file = open(file=self._file_path, mode="w")
         dump(data, content_file)
@@ -42,6 +37,8 @@ class JsonParser():
 
 
 
+data_file = JsonParser(f"{WORKDIR}/data.json")
+config_file = JsonParser(f"{WORKDIR}/config.json")
 @app.command()
 async def sus(ctx : Context) -> None:
     user = str(ctx.author)
