@@ -12,6 +12,10 @@ intents.message_content = True
 WORKDIR = os.path.abspath("./")
 
 token_file = "discord.token"
+items_csv = CSVFile(f"{WORKDIR}/data/items.csv",["item_id","name","booster"])
+users_csv = CSVFile(f"{WORKDIR}/data/users.csv",["user_id","discord_id","sus_amount","game_id","inventory_id"])
+game_csv = CSVFile(f"{WORKDIR}/data/game.csv",["game_id","wins","losses","score",])
+inventory_csv = CSVFile(f"{WORKDIR}/data/inventory.csv",["inventory_id","item","amount"])
 config_file = JsonParser(f"{WORKDIR}/config.json")
 
 app = commands.Bot(intents=intents,command_prefix="$")
