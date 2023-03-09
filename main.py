@@ -1,42 +1,19 @@
 import os
-from json import load,dump
+
 from discord import Intents
 from discord.ext import commands
 from discord.ext.commands import Context
 from random import random, randrange
-from pathlib import Path
 from asyncio import sleep
+from data_handler import JsonParser, CSVFile
 intents = Intents.default()
 intents.message_content = True
 
 WORKDIR = os.path.abspath("./")
-class JsonParser():
-    _file_path = ""
-    def __init__(self, path: str) -> None:
-        self._file_path = path
-        if(not os.path.exists(path)):
-            self.create_empty_json()
-        
-    def read_content(self) -> dict:
-        content_file = open(file=self._file_path, mode="r")
-        data = load(content_file)
-        content_file.close()
-        return data
-    
-    def create_empty_json(self) -> None:
-        Path(self._file_path).touch()
-        self.write_content({})
-    
-    def write_content(self, data: dict) -> None:
-        content_file = open(file=self._file_path, mode="w")
-        dump(data, content_file)
-        content_file.close()
 
-    def _does_path_exist(self,path : str) -> bool:
-        return os.path.exists(path)
-
-data_file = JsonParser(f"{WORKDIR}/data.json")
+token_file = "discord.token"
 config_file = JsonParser(f"{WORKDIR}/config.json")
+
 app = commands.Bot(intents=intents,command_prefix="$")
 is_bot_running = False
 
@@ -65,7 +42,7 @@ async def flip_coin(ctx : Context) -> None:
         await ctx.send("TAILS")
 
 def get_token() -> str:
-    token = config_file.read_content()["token"]
+    token = open(f"{WORKDIR}/discord.token",mode="r").readline()
     return token
 
 async def send_croissant(channel_id : int) -> None:
@@ -80,7 +57,7 @@ async def on_ready():
         await send_croissant(channel_id)
         time_delay = randrange(start=21600,stop=86400)
         await sleep(time_delay)
-         
+
 if __name__ == "__main__":
     token = get_token()
     app.run(token)
