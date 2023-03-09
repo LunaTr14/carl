@@ -5,30 +5,6 @@ import csv
 from os.path import abspath
 
 WORKDIR = abspath("./")
-class JsonParser():
-    _file_path = ""
-    def __init__(self, path: str) -> None:
-        self._file_path = path
-        if(not exists(path)):
-            self.create_empty_json()
-        
-    def read_content(self) -> dict:
-        content_file = open(file=self._file_path, mode="r")
-        data = load(content_file)
-        content_file.close()
-        return data
-    
-    def create_empty_json(self) -> None:
-        Path(self._file_path).touch()
-        self.write_content({})
-    
-    def write_content(self, data: dict) -> None:
-        content_file = open(file=self._file_path, mode="w")
-        dump(data, content_file)
-        content_file.close()
-
-    def _does_path_exist(self,path : str) -> bool:
-        return exists(path)
 
 class CSVFile():
     __csv_file = ""
