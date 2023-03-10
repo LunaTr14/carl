@@ -12,13 +12,12 @@ intents.message_content = True
 
 WORKDIR = os.path.abspath("./")
 
-token_file = "discord.token"
-items_csv = CSVFile(f"{WORKDIR}/data/items.csv",["item_id","name","booster"])
-game_csv = CSVFile(f"{WORKDIR}/data/game.csv",["game_id","wins","losses","score",])
-inventory_csv = CSVFile(f"{WORKDIR}/data/inventory.csv",["inventory_id","item","amount"])
-config_file = JsonParser(f"{WORKDIR}/config.json")
 CSV_HEADINGS = {"user":["discord_id","sus_amount","game_id","inventory_id"],"item":["item_id","name","booster"],"game":["game_id","wins","losses","score"],"inventory":["inventory_id","item","amount"]}
+token_file = f"{WORKDIR}/discord.token"
+item_csv = CarlCSV(file_name=f"{WORKDIR}/data/item.csv",headings=CSV_HEADINGS["item"])
 users_csv = CarlCSV(f"{WORKDIR}/data/users.csv",headings=CSV_HEADINGS["user"])
+game_csv = CarlCSV(f"{WORKDIR}/data/game.csv",headings=CSV_HEADINGS["game"])
+inventory_csv = CarlCSV(f"{WORKDIR}/data/inventory.csv",headings=CSV_HEADINGS["inventory"])
 
 app = commands.Bot(intents=intents,command_prefix="$")
 is_bot_running = False
