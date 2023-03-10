@@ -5,7 +5,8 @@ from discord.ext import commands
 from discord.ext.commands import Context
 from random import random, randrange
 from asyncio import sleep
-from data_handler import JsonParser, CSVFile
+from carl_modules.user import User as CarlUser
+from carl_modules.csv_handler import CSV as CarlCSV
 intents = Intents.default()
 intents.message_content = True
 
@@ -13,24 +14,28 @@ WORKDIR = os.path.abspath("./")
 
 token_file = "discord.token"
 items_csv = CSVFile(f"{WORKDIR}/data/items.csv",["item_id","name","booster"])
-users_csv = CSVFile(f"{WORKDIR}/data/users.csv",["user_id","discord_id","sus_amount","game_id","inventory_id"])
 game_csv = CSVFile(f"{WORKDIR}/data/game.csv",["game_id","wins","losses","score",])
 inventory_csv = CSVFile(f"{WORKDIR}/data/inventory.csv",["inventory_id","item","amount"])
 config_file = JsonParser(f"{WORKDIR}/config.json")
+CSV_HEADINGS = {"user":["discord_id","sus_amount","game_id","inventory_id"],"item":["item_id","name","booster"],"game":["game_id","wins","losses","score"],"inventory":["inventory_id","item","amount"]}
+users_csv = CarlCSV(f"{WORKDIR}/data/users.csv",headings=CSV_HEADINGS["user"])
 
 app = commands.Bot(intents=intents,command_prefix="$")
 is_bot_running = False
 
 @app.command()
 async def sus(ctx : Context) -> None:
-    user = str(ctx.author)
-    file_content = data_file.read_content()
-    number_of_sus = 1
-    if(user in file_content.keys()):
-        number_of_sus = file_content[user]["num_sus"] + 1
-    file_content[user] = {"num_sus":number_of_sus}
-    data_file.write_content(file_content)
-    await ctx.send("imposter ඞ\n{user}: {amount}".format(user=user,amount=file_content[user]["num_sus"]))
+    user = CarlUser()
+    discord_id = str(ctx.author)
+    user_record = users_csv.search_entry("discord_id",discord_id)
+    if(user_record != []):
+        user.set_values_from_row(user_record[0])
+        users_csv.remove_duplicates("discord_id",discord_id)
+    else:
+        user.create_user(discord_id=discord_id)
+    user.sus_amount = int(user.sus_amount) + 1
+    users_csv.append_record([user.export_row()])
+    await ctx.send("imposter ඞ\n{user}: {amount}".format(user=discord_id,amount=user.sus_amount))
 
 @app.command()
 async def rng(ctx : Context) -> None:
