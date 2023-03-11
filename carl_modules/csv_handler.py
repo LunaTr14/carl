@@ -59,3 +59,42 @@ class CSV():
     def append_row(self, row :list) ->None:
         self._set_mode("a")
         csv_appender = csv.writer(self._csv_file,lineterminator="\r")
+        csv_appender.writerow(row)
+    
+class CSVTest(CSV):
+    __workdir = abspath("./test")
+    def __init__(self) -> None:
+        super().__init__(self.__workdir+"/temp.csv")
+    
+    def __create_testing_files(self,path : str,file_name : str):
+        self._create_missing_folders(path)
+        self._csv_file = open(path+"/"+file_name,mode="w")
+
+    def __create_random_path(self) -> str:
+        return self.__workdir + "/" + str(randrange(0,99999))
+    
+    def test_folder_create(self):
+        folder_path = self.__create_random_path()
+        self._create_missing_folders(folder_path)
+        assert exists(folder_path), f"\nMissing Folder\nLocation: {folder_path}"
+        print(f"Folder Created Result: {folder_path}")
+    
+    def test_set_mode(self):
+        self.__create_testing_files(self.__create_random_path(),"test.tmp")
+        for mode in ["r","w","a"]:
+            self._set_mode(mode)
+            assert self._csv_file.mode == mode, f"Mode Error Expected {mode}\nGot: {self._csv_file.mode}"
+        print("File mode Switching Working")
+
+    def test_append_record(self):
+        self.__create_testing_files(self.__create_random_path(),"test.tmp")
+        test_list = ["0123","asvsd","dsfdsf","qwewqe"]
+        self.append_row(test_list)
+        result = self.read_csv()
+        assert self.read_csv() == [test_list], f"\nError in appending / reading file\nFile Path: {self._csv_path}\nExpected {test_list}\nGot: {[result]}"
+        print("Append / Read Working")
+    
+    def test_all(self):
+        self.test_folder_create()
+        self.test_set_mode()
+        self.test_append_record()
