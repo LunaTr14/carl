@@ -1,44 +1,33 @@
 from pathlib import Path
-from os.path import exists
+from os.path import exists, abspath
+from os import mkdir, rmdir
+from random import randrange
 import csv
 class CSV():
-    __csv_path = ""
-    __csv_file = None
-    __headings = []
+    _csv_file = None
+    _csv_path = ""
     def does_entry_exist(self, value : str) -> bool:
         if(self.get_entry(value) == []):
             return False
         return True
         
-    def __does_file_exist(self) -> bool:
-        if(exists(self.__csv_path)):
-            return True
-        return False
-
-    def __create_csv_file(self) -> None:
-        Path(self.__csv_path).touch()
-
-    def __create_headings(self) -> None:
-        self.__set_write_mode()
-        csv_writer = csv.writer(self.__csv_file,lineterminator="\r")
-        csv_writer.writerow(self.__headings)
-        
-    def __init__(self,file_name : str, headings : list) -> None:
-        self.__csv_path= file_name
-        self.__headings = headings
-        if(not self.__does_file_exist()):
-            self.__create_csv_file()
-            self.__create_headings()
-        self.__csv_file = open(self.__csv_path,mode="r")
-
-    def __set_read_mode(self) -> None:
-        self.__csv_file = open(self.__csv_path,mode="r")
+    def __get_folder_tree(self, path: str) -> list:
+        return path.split("/")
     
-    def __set_write_mode(self) -> None:
-        self.__csv_file = open(self.__csv_path,mode="w")
+    def _create_missing_folders(self,folder_path: str) -> None:
+        dir_tree = self.__get_folder_tree(folder_path)
+        full_path = ""
+        for folder in dir_tree:
+            full_path = full_path + "/"+folder
+            if(not exists(full_path)):
+                mkdir(abspath(full_path))
+        
+    def __init__(self,csv_path : str) -> None:
+        self._csv_path = csv_path
 
-    def __set_append_mode(self) -> None:
-        self.__csv_file = open(self.__csv_path,mode="a")
+    def _set_mode(self, mode : str) -> None:
+        self._csv_file.close()
+        self._csv_file = open(self._csv_path,mode=mode)
 
     def get_entry(self, search_item : str) ->list:
         data = self.read_csv()
@@ -49,8 +38,8 @@ class CSV():
         return valid_entries
     
     def read_csv(self) -> list:
-        self.__set_read_mode()
-        csv_reader = csv.reader(self.__csv_file)
+        self._set_mode("r")
+        csv_reader = csv.reader(self._csv_file)
         rows = []
         for row in csv_reader:
             rows.append(row)
@@ -63,11 +52,10 @@ class CSV():
                 if entry == id:
                     data.pop(data.index(row))
                     break
-        self.__set_write_mode()
-        csv_writer = csv.writer(self.__csv_file,lineterminator="\r")
+        self._set_write_mode()
+        csv_writer = csv.writer(self._csv_file,lineterminator="\r")
         csv_writer.writerows(data)
 
     def append_row(self, row :list) ->None:
-        self.__set_append_mode()
-        csv_appender = csv.writer(self.__csv_file,lineterminator="\r")
-        csv_appender.writerow(row)
+        self._set_mode("a")
+        csv_appender = csv.writer(self._csv_file,lineterminator="\r")
