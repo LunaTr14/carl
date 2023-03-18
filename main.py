@@ -4,19 +4,22 @@ from discord.ext import commands
 from discord.ext.commands import Context
 from discord import User
 from random import random, randrange
-from carl_modules.user import User as CarlUser
 from carl_modules.csv_handler import CSV as CarlCSV
 from carl_modules.game import Game as CarlGame
+from time import time_ns
 WORKDIR = abspath("./")
 
 CSV_HEADINGS = {"user":["discord_id","sus_amount","game_id"],
                 "game":["game_id","score","boost"]}
 
+DEFAULT_SCORE = 1000
+DEFAULT_BOOST = 100
+
 token_file = f"{WORKDIR}/discord.token"
 
 intents = Intents.default()
 intents.message_content = True
-app = commands.Bot(intents=intents,command_prefix="^")
+app = commands.Bot(intents=intents,command_prefix="$")
 
 game_csv = CarlCSV(f"{WORKDIR}/data/game.csv")
 user_csv = CarlCSV(f"{WORKDIR}/data/user.csv")
@@ -46,16 +49,33 @@ def get_fight_results(sender_boost: int,recipient_boost: int) -> str:
         return "sender"
     return "recipient"
 
+def generate_id() -> str:
+    return str(randrange(99999,999999) * time_ns())[0:6]
+
 @app.command(name="fight")
 async def fight(ctx : Context, opponent : User)  -> None:
-    sender_user = CarlUser(user_csv,game_csv,str(ctx.author.id))
-    opponent_user = CarlUser(user_csv,game_csv,str(opponent.id))
-    sender_game = CarlGame(game_csv,sender_user.get_game_id())
-    winner = sender_game.fight(opponent_user.get_game_id())
+    user_id = str(ctx.author.id)
+    opponent_id = str(opponent.id)
+    if(not user_csv.does_entry_exist(user_id)):
+        game_id = generate_id()
+        user_csv.save([user_id,0,game_id])
+        game_csv.save([game_id,DEFAULT_SCORE,DEFAULT_BOOST])
+    if(not user_csv.does_entry_exist(opponent_id)):
+        game_id = generate_id()
+        user_csv.save([opponent_id,0,game_id])
+        game_csv.save([game_id,DEFAULT_SCORE,DEFAULT_BOOST])
+    
+    user_game_id = user_csv.search(user_id)[0][2]
+    user_game_row = game_csv.search(user_game_id)[0]
+
+    opponent_game_id = user_csv.search(opponent_id)[0][2]
+    opponent_game_row = game_csv.search(opponent_game_id)[0]
+
+    winner = CarlGame(game_csv).fight(user_game_row,opponent_game_row)
     if(winner == "OPPONENT"):
-        await ctx.send(f"Winner is: {opponent}")
+        await ctx.send(f"Winner is: {opponent.display_name}")
     else:
-        await ctx.send(f"Winner is: {ctx.author}")
+        await ctx.send(f"Winner is: {ctx.author.display_name}")
 
 
 def get_token() -> str:
