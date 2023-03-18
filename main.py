@@ -24,11 +24,20 @@ app = commands.Bot(intents=intents,command_prefix="$")
 game_csv = CarlCSV(f"{WORKDIR}/data/game.csv")
 user_csv = CarlCSV(f"{WORKDIR}/data/user.csv")
 
+def generate_id() -> str:
+    return str(randrange(99999,999999) * time_ns())[0:6]
+
 @app.command(name="sus")
 async def sus(ctx : Context) -> None:
-    user = CarlUser(ctx.author)
-    user.add_sus()
-    await ctx.send("imposter ඞ\n{user}: {amount}".format(user=ctx.author,amount=user.get_sus()))
+    
+    user_id = str(ctx.author.id)
+    user_row = [user_id,0,generate_id()]
+    if(user_csv.does_entry_exist(user_id)):
+        user_row = user_csv.search(user_id)[0]
+    sus_amount = user_row[1]
+    user_row[1] = str(int(user_row[1]) + 1)
+    user_csv.save(user_row)
+    await ctx.send("imposter ඞ\n{user}: {amount}".format(user=ctx.author.display_name,amount=sus_amount))
 
 @app.command(name="rng")
 async def rng(ctx : Context) -> None:
@@ -42,15 +51,6 @@ async def flip_coin(ctx : Context,*args) -> None:
         await ctx.send("HEADS")
     elif (rand == 0):
         await ctx.send("TAILS")
-    
-def get_fight_results(sender_boost: int,recipient_boost: int) -> str:
-    total = sender_boost + recipient_boost
-    if((sender_boost / total) > random()):
-        return "sender"
-    return "recipient"
-
-def generate_id() -> str:
-    return str(randrange(99999,999999) * time_ns())[0:6]
 
 @app.command(name="fight")
 async def fight(ctx : Context, opponent : User)  -> None:
