@@ -74,8 +74,13 @@ async def fight(ctx : Context, opponent : User)  -> None:
     winner = CarlGame(game_csv).fight(user_game_row,opponent_game_row)
     if(winner == "OPPONENT"):
         await ctx.send(f"Winner is: {opponent.display_name}")
-    else:
+        return
+    elif(winner == "SENDER"):
         await ctx.send(f"Winner is: {ctx.author.display_name}")
+        return
+    await ctx.send(winner)
+    
+        
 
 @app.command(name="score")
 async def get_score(ctx : Context, user : User = None):

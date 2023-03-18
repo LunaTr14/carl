@@ -19,6 +19,8 @@ class Game():
         self.__game_csv = game_csv
 
     def fight(self, sender_row : list,opponent_row : list) -> str:
+        if(int(sender_row[1]) <= 0 or int(opponent_row[1]) <= 0):
+            return "Insufficient Points"
         win_chance = self.__calculate_win_chance(sender_row[2],opponent_row[2])
         winner = self.__determine_winner(float(win_chance))
         if(winner == "SENDER"):
