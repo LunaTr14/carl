@@ -53,9 +53,13 @@ class CSV():
         data = self.__read_csv()
         valid_entries = []
         for row in data:
-            if(search_item in row):
-                valid_entries.append(row)
+            for cell in row:
+                if(search_item == cell):
+                    valid_entries.append(row)
         return valid_entries
+    
+    def get_all(self) -> list:
+        return self.__read_csv()
     
     def append_row(self, row :list) ->None:
         self.__set_mode("a")
