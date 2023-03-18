@@ -1,11 +1,11 @@
 <a name="readme-top"></a>
-<br />
+<br/>
 <div align="center">
 <h3 align="center">Carl-Bot</h3>
 
   <p align="center">
     A Discord joke bot and personal project
-    <br />
+    <br/>
   </p>
 </div>
 
