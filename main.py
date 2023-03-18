@@ -77,6 +77,21 @@ async def fight(ctx : Context, opponent : User)  -> None:
     else:
         await ctx.send(f"Winner is: {ctx.author.display_name}")
 
+@app.command(name="score")
+async def get_score(ctx : Context, user : User = None):
+    user_id = str(ctx.author.id)
+    display_name = ctx.author.display_name
+    if(user != None):
+        user_id = str(user.id)
+        display_name = ctx.author.display_name
+    
+    if(not user_csv.does_entry_exist(user_id)):
+        await ctx.send("User Does not exist")
+        return
+    
+    game_id = user_csv.search(user_id)[0][2]
+    score = game_csv.search(game_id)[0][1]
+    await ctx.send(f'{display_name} Score: {score}')
 
 def get_token() -> str:
     token = open(f"{WORKDIR}/discord.token",mode="r").read()
