@@ -16,23 +16,16 @@ token_file = f"{WORKDIR}/discord.token"
 
 intents = Intents.default()
 intents.message_content = True
-app = commands.Bot(intents=intents,command_prefix="$")
+app = commands.Bot(intents=intents,command_prefix="^")
 
 game_csv = CarlCSV(f"{WORKDIR}/data/game.csv")
 user_csv = CarlCSV(f"{WORKDIR}/data/user.csv")
 
 @app.command(name="sus")
 async def sus(ctx : Context) -> None:
-    user = CarlUser()
-    discord_id = str(ctx.author)
-    if(users_csv.does_entry_exist("discord_id",discord_id)):
-        user.set_values_from_row(users_csv.get_entry("discord_id",discord_id))
-        users_csv.remove_duplicates("discord_id",discord_id)
-    else:
-        user.create(discord_id)
-    user.set_sus(user.get_sus() +  1)
-    users_csv.append_record([user.export_row()])
-    await ctx.send("imposter ඞ\n{user}: {amount}".format(user=discord_id,amount=user.get_sus()))
+    user = CarlUser(ctx.author)
+    user.add_sus()
+    await ctx.send("imposter ඞ\n{user}: {amount}".format(user=ctx.author,amount=user.get_sus()))
 
 @app.command(name="rng")
 async def rng(ctx : Context) -> None:
