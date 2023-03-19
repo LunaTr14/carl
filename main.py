@@ -1,8 +1,5 @@
 from os.path import abspath
-from discord import Intents
-from discord.ext import commands
-from discord.ext.commands import Context
-from discord import User
+import interactions
 from random import random, randrange
 from carl_modules.csv_handler import CSV as CarlCSV
 from carl_modules.game import Game as CarlGame
@@ -16,96 +13,107 @@ DEFAULT_SCORE = 1000
 DEFAULT_BOOST = 100
 
 token_file = f"{WORKDIR}/discord.token"
-
-intents = Intents.default()
-intents.message_content = True
-app = commands.Bot(intents=intents,command_prefix="$")
-
 game_csv = CarlCSV(f"{WORKDIR}/data/game.csv")
 user_csv = CarlCSV(f"{WORKDIR}/data/user.csv")
+
+def get_token() -> str:
+    token = open(f"{WORKDIR}/discord.token",mode="r").read()
+    return token
+
+app = interactions.Client(get_token())
 
 def generate_id() -> str:
     return str(randrange(99999,999999) * time_ns())[0:6]
 
-@app.command(name="sus")
-async def sus(ctx : Context) -> None:
+
+@app.command(name="sus",description="IMPOSTER SUS?!??!?!")
+async def sus(ctx : interactions.CommandContext) -> None:
     
-    user_id = str(ctx.author.id)
-    user_row = [user_id,0,generate_id()]
-    if(user_csv.does_entry_exist(user_id)):
-        user_row = user_csv.search(user_id)[0]
+    sender_id = str(ctx.author.id)
+    displayname = ctx.author.user.username
+    user_row = [sender_id,0,generate_id()]
+    if(user_csv.does_entry_exist(sender_id)):
+        user_row = user_csv.search(sender_id)[0]
     sus_amount = user_row[1]
     user_row[1] = str(int(user_row[1]) + 1)
     user_csv.save(user_row)
-    await ctx.send("imposter ඞ\n{user}: {amount}".format(user=ctx.author.display_name,amount=sus_amount))
+    await ctx.send("imposter ඞ\n{user}: {amount}".format(user=displayname,amount=sus_amount))
 
-@app.command(name="rng")
-async def rng(ctx : Context) -> None:
+@app.command(name="rng",description="Generates a random number from 0 to 1")
+async def rng(ctx : interactions.CommandContext) -> None:
     rand_number = str(random())
     await ctx.send(rand_number)
 
-@app.command(name="flip-coin")
-async def flip_coin(ctx : Context,*args) -> None:
+@app.command(name="flip-coin",description="Flips a Coin")
+async def flip_coin(ctx : interactions.CommandContext,*args) -> None:
     rand = randrange(0,2)
     if(rand == 1):
         await ctx.send("HEADS")
     elif (rand == 0):
         await ctx.send("TAILS")
 
-@app.command(name="fight")
-async def fight(ctx : Context, opponent : User)  -> None:
-    user_id = str(ctx.author.id)
+@app.command(name="fight",description="Fights tagged player",options=[
+    interactions.Option(
+    name="opponent",
+    description="Opponent Player",
+    type=interactions.OptionType.USER,
+    required=True
+)])
+async def fight(ctx : interactions.CommandContext, opponent : interactions.User)  -> None:    
+    sender_id = str(ctx.user.id)
     opponent_id = str(opponent.id)
-    if(not user_csv.does_entry_exist(user_id)):
+    if(sender_id == opponent_id):
+        await ctx.send("Sender and Opponent are the same User")
+        return
+    sender_username = ctx.user.username
+    opponent_username = opponent.username
+    if(not user_csv.does_entry_exist(sender_id)):
         game_id = generate_id()
-        user_csv.save([user_id,0,game_id])
+        user_csv.save([sender_id,0,game_id])
         game_csv.save([game_id,DEFAULT_SCORE,DEFAULT_BOOST])
     if(not user_csv.does_entry_exist(opponent_id)):
         game_id = generate_id()
         user_csv.save([opponent_id,0,game_id])
         game_csv.save([game_id,DEFAULT_SCORE,DEFAULT_BOOST])
     
-    user_game_id = user_csv.search(user_id)[0][2]
+    user_game_id = user_csv.search(sender_id)[0][2]
     user_game_row = game_csv.search(user_game_id)[0]
 
     opponent_game_id = user_csv.search(opponent_id)[0][2]
     opponent_game_row = game_csv.search(opponent_game_id)[0]
 
     winner = CarlGame(game_csv).fight(user_game_row,opponent_game_row)
-    if(winner == "OPPONENT"):
-        await ctx.send(f"Winner is: {opponent.display_name}")
-        return
-    elif(winner == "SENDER"):
-        await ctx.send(f"Winner is: {ctx.author.display_name}")
-        return
-    await ctx.send(winner)
+    winner_display_name = opponent_username
+    if(winner[0] == user_game_id):
+        winner_display_name = sender_username
     
-        
-
-@app.command(name="score")
-async def get_score(ctx : Context, user : User = None):
-    user_id = str(ctx.author.id)
-    display_name = ctx.author.display_name
+    await ctx.send(f"Winner: {winner_display_name}\nScore: {winner[1]}")
+    
+@app.command(name="score",description="Gets tagged player's score",options=[
+    interactions.Option(
+    name="user",
+    description="Tagged player",
+    type=interactions.OptionType.USER,
+    required=False
+)])
+async def get_score(ctx : interactions.CommandContext, user : interactions.User = None):
+    sender_id = str(ctx.user.id)
+    display_name = ctx.user.username
     if(user != None):
-        user_id = str(user.id)
-        display_name = ctx.author.display_name
+        sender_id = str(user.id)
+        display_name = user.username
     
-    if(not user_csv.does_entry_exist(user_id)):
+    if(not user_csv.does_entry_exist(sender_id)):
         await ctx.send("User Does not exist")
         return
     
-    game_id = user_csv.search(user_id)[0][2]
+    game_id = user_csv.search(sender_id)[0][2]
     score = game_csv.search(game_id)[0][1]
     await ctx.send(f'{display_name} Score: {score}')
-
-def get_token() -> str:
-    token = open(f"{WORKDIR}/discord.token",mode="r").read()
-    return token
 
 @app.event
 async def on_ready():
     print("Bot is Running")
 
 if __name__ == "__main__":
-    token = get_token()
-    app.run(token)
+    app.start()
