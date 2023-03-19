@@ -72,17 +72,28 @@ async def fight(ctx : interactions.CommandContext, opponent : interactions.User)
         game_id = generate_id()
         user_csv.save([sender_id,0,game_id])
         game_csv.save([game_id,DEFAULT_SCORE,DEFAULT_BOOST])
+
     if(not user_csv.does_entry_exist(opponent_id)):
         game_id = generate_id()
         user_csv.save([opponent_id,0,game_id])
-        game_csv.save([game_id,DEFAULT_SCORE,DEFAULT_BOOST])
+        
     
-    user_game_id = user_csv.search(sender_id)[0][2]
-    user_game_row = game_csv.search(user_game_id)[0]
-
-    opponent_game_id = user_csv.search(opponent_id)[0][2]
+    user_game_id = str(user_csv.search(sender_id)[0][2])
+    if(not game_csv.does_entry_exist(user_game_id)):
+        game_csv.save([user_game_id,DEFAULT_SCORE,DEFAULT_BOOST])
+    
+    opponent_game_id = str(user_csv.search(opponent_id)[0][2])
+    if(not game_csv.does_entry_exist(opponent_game_id)):
+        game_csv.save([opponent_game_id,DEFAULT_SCORE,DEFAULT_BOOST])
+    
     opponent_game_row = game_csv.search(opponent_game_id)[0]
+    user_game_row = game_csv.search(user_game_id)[0]
+    
 
+    if(int(user_game_row[1]) <=0 or int(opponent_game_row[1]) <= 0):
+        await ctx.send("Unable to fight due to score < 0")
+        return
+    
     winner = CarlGame(game_csv).fight(user_game_row,opponent_game_row)
     winner_display_name = opponent_username
     if(winner[0] == user_game_id):

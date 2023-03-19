@@ -34,9 +34,6 @@ class Game():
     def fight(self, sender_row : list,opponent_row : list) -> str:
         sender_points = round(float(sender_row[1]))
         opponent_points = round(float(opponent_row[1]))
-        if(sender_points <= 0 or opponent_points <= 0):
-            return "Insufficient Points"
-        
         sender_boost = round(float(sender_row[2]))
         opponent_boost = round(float(sender_row[2]))
         win_chance = self.__calculate_win_chance(sender_boost,opponent_boost)
