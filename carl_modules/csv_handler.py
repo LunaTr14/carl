@@ -66,3 +66,6 @@ class CSV():
         self.__set_mode("a")
         csv_writer = csv.writer(self._csv_file,lineterminator="\r")
         csv_writer.writerow(data)
+    
+    def get_all(self) -> list:
+        return self.__read_csv()
