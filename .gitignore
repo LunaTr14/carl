@@ -194,3 +194,4 @@ poetry.toml
 *.json
 *.csv
 *.token
+*.temp*
