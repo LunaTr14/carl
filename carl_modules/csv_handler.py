@@ -41,7 +41,7 @@ class CSV():
                 results.append(row)
         return results
 
-    def clean_duplicates(self):
+    def clean_duplicates(self) -> None:
         data = self.read()
         results = []
         for row in data:
