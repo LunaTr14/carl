@@ -15,8 +15,8 @@ class TestCSVHandler(unittest.TestCase):
         expected = [["Test1","Test2","1","2","3"],["Test1a","Testb2","cc1","aa2","a3"]]
         self.csv_obj.write(expected)
         result = self.csv_obj.read()
-        self.assertEqual(result,expected,"\nreadWrite: " + "❌")
-        print("\nreadWrite: " + "✅")
+        self.assertEqual(result,expected,"\n read_write: " + "❌")
+        print("\nread_write: " + "✅")
     
     def test_search(self):
         expected = [["Test3","Test4","4","5","6"]]
@@ -35,13 +35,14 @@ class TestCSVHandler(unittest.TestCase):
     
     def test_clean_duplicates(self):
         expected = ["Test7","Test8","13","14","15"]
+        self.csv_obj.write([])
         self.csv_obj.append([expected,expected,expected])
         self.csv_obj.clean_duplicates()
         results = self.csv_obj.read()
-        self.assertEqual(results,expected,"clean_duplicates: " + "❌")
-        print("\clean_duplicates: " + "✅")
+        self.assertEqual(results,[expected],"clean_duplicates: " + "❌")
+        print("\nclean_duplicates: " + "✅")
 
 if(__name__ =="__main__"):
-    print("\n-----START CSV TEST-----\n")
+    print("-----START CSV TEST-----")
     unittest.main()
     print("-----END END TEST-----")
