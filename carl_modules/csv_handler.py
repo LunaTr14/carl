@@ -47,5 +47,16 @@ class CSV():
         for row in data:
             if(row not in results):
                 results.append(row)
-        
+        self.write(results)
+    
+    def clean_duplicates_by_id(self ,id : str) -> None:
+        data = self.read()
+        results = []
+        first_entry = False # boolean to determine if a single entry of id has already been added to results
+        for row in data:
+            if(not first_entry):
+                results.append(row)
+                first_entry = True
+            elif(row[0] != id):
+                results.append(row)
         self.write(results)

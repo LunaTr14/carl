@@ -4,8 +4,6 @@ from os.path import abspath
 sys.path.append("../")
 from csv_handler import CSV
 
-
-
 class TestCSVHandler(unittest.TestCase):
     TEST_PATH = abspath("./Test/.temp_test/")
     TEST_FILE = "test.file"
@@ -15,15 +13,15 @@ class TestCSVHandler(unittest.TestCase):
         expected = [["Test1","Test2","1","2","3"],["Test1a","Testb2","cc1","aa2","a3"]]
         self.csv_obj.write(expected)
         result = self.csv_obj.read()
-        self.assertEqual(result,expected,"\n read_write: " + "❌")
-        print("\nread_write: " + "✅")
+        self.assertEqual(result,expected," read_write: " + "❌")
+        print("read_write: " + "✅")
     
     def test_search(self):
         expected = [["Test3","Test4","4","5","6"]]
         self.csv_obj.write(expected)
         results = self.csv_obj.search("Test3")
-        self.assertEqual(results,expected,"\nsearch: " + "❌")
-        print("\nsearch: " + "✅")
+        self.assertEqual(results,expected,"search: " + "❌")
+        print("search: " + "✅")
 
     def test_append(self):
         expected = [["Test5","Test6","7","8","9"],["Test7","Test8","10","11","12"]]
@@ -31,7 +29,7 @@ class TestCSVHandler(unittest.TestCase):
         self.csv_obj.append([expected[1]])
         results = self.csv_obj.read()
         self.assertEqual(results,expected,"append: " + "❌")
-        print("\nappend: " + "✅")
+        print("append: " + "✅")
     
     def test_clean_duplicates(self):
         expected = ["Test7","Test8","13","14","15"]
@@ -40,7 +38,17 @@ class TestCSVHandler(unittest.TestCase):
         self.csv_obj.clean_duplicates()
         results = self.csv_obj.read()
         self.assertEqual(results,[expected],"clean_duplicates: " + "❌")
-        print("\nclean_duplicates: " + "✅")
+        print("clean_duplicates: " + "✅")
+    
+    def test_clean_duplicates_by_id(self):
+        expected = [["Test7","Test8","10","11","12"]]
+        for n in range(10):
+            expected[0][3] = expected[0][3] + str(n)
+            self.csv_obj.append(expected)
+        self.csv_obj.clean_duplicates_by_id(expected[0][0])
+        result = self.csv_obj.read()
+        self.assertEqual(len(result), 1 ,"clean_duplicates_by_id: " + "❌")
+        print("clean_duplicates_by_id: " + "✅")
 
 if(__name__ =="__main__"):
     print("-----START CSV TEST-----")
