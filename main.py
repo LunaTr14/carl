@@ -3,25 +3,23 @@ import interactions
 from interactions import slash_command, SlashContext
 from random import random, randrange
 from carl_modules.csv_handler import CSV as CarlCSV
-from carl_modules.game import Game as CarlGame
+#from carl_modules.game import Game as CarlGame
 from time import time_ns
 WORKDIR = abspath("./")
 
-CSV_HEADINGS = {"user":["discord_id","sus_amount","game_id"],
-                "game":["game_id","score","boost"]}
+CSV_HEADINGS = ["discord_id","sus_amount","score","win_chance","win","loss"]
 
 DEFAULT_SCORE = 1000
 DEFAULT_BOOST = 100
 
 token_file = f"{WORKDIR}/discord.token"
-game_csv = CarlCSV(f"{WORKDIR}/data/game.csv")
-user_csv = CarlCSV(f"{WORKDIR}/data/user.csv")
+user_csv = CarlCSV(file_name="user.csv",file_path=WORKDIR)
 
 def get_token() -> str:
     token = open(f"{WORKDIR}/discord.token",mode="r").read()
     return token
 
-app = interactions.Client(get_token())
+app = interactions.Client()
 
 def generate_id() -> str:
     return str(randrange(99999,999999) * time_ns())[0:6]
@@ -114,7 +112,7 @@ async def get_score(ctx : interactions.CommandContext, user : interactions.User 
     score = game_csv.search(game_id)[0][1]
     await ctx.send(f'{display_name} Score: {score}')
 
-@app.event
+@interactions.listen()
 async def on_ready():
     print("Bot is Running")
 
