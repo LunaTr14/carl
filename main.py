@@ -1,5 +1,6 @@
 from os.path import abspath
 import interactions
+from interactions import slash_command, SlashContext
 from random import random, randrange
 from carl_modules.csv_handler import CSV as CarlCSV
 from carl_modules.game import Game as CarlGame
@@ -26,17 +27,19 @@ def generate_id() -> str:
     return str(randrange(99999,999999) * time_ns())[0:6]
 
 
-@app.command(name="sus",description="IMPOSTER SUS?!??!?!")
-async def sus(ctx : interactions.CommandContext) -> None:
-    
-    sender_id = str(ctx.author.id)
-    displayname = ctx.author.user.username
-    user_row = [sender_id,0,generate_id()]
-    if(user_csv.does_entry_exist(sender_id)):
-        user_row = user_csv.search(sender_id)[0]
-    sus_amount = user_row[1]
-    user_row[1] = str(int(user_row[1]) + 1)
-    user_csv.save(user_row)
+@slash_command(name="sus",description="IMPOSTER SUS?!??!?!")
+async def sus(ctx : SlashContext) -> None:
+    sus_amount = 0
+    displayname = ctx.author.username
+    discord_id = str(ctx.author.id)
+    search_value = user_csv.search(discord_id)[0]
+    if(len(search_value) <= 0):
+        search_value = [discord_id,"0","0","100","0","0"]
+    sus_amount = int(search_value[1])
+    sus_amount += 1
+    search_value[1] = str(sus_amount)
+    user_csv.remove_entries_by_id(discord_id)
+    user_csv.append([search_value])
     await ctx.send("imposter ඞ\n{user}: {amount}".format(user=displayname,amount=sus_amount))
 
 @app.command(name="rng",description="Generates a random number from 0 to 1")
