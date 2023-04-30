@@ -49,8 +49,21 @@ class TestCSVHandler(unittest.TestCase):
         result = self.csv_obj.read()
         self.assertEqual(len(result), 1 ,"clean_duplicates_by_id: " + "❌")
         print("clean_duplicates_by_id: " + "✅")
+    
+    def test_remove_entries_by_id(self):
+        self.csv_obj.write([[]])
+        temp_entry = ["Test123","0","a"]
+        for n in range(5):
+            self.csv_obj.append([temp_entry])
+        self.csv_obj.remove_entries_by_id(temp_entry[0])
+        result = self.csv_obj.read()
+        print(result)
+        self.assertTrue(result == [],"remove_entries_by_id: " + "❌")
+        
+        print("remove_entries_by_id: " + "✅")
 
 if(__name__ =="__main__"):
     print("-----START CSV TEST-----")
-    unittest.main()
+    t = TestCSVHandler()
+    t.test_remove_entries_by_id()
     print("-----END END TEST-----")

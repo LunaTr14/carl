@@ -60,3 +60,12 @@ class CSV():
             elif(row[0] != id):
                 results.append(row)
         self.write(results)
+    
+    def remove_entries_by_id(self, id : str) -> None:
+        data = self.read()
+        result = []
+        for row in data:
+            print(row)
+            if(len(row) > 0 and row[0] != id):
+                result.append(row)
+        self.write(result)
