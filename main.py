@@ -39,17 +39,22 @@ async def sus(ctx : SlashContext) -> None:
     user_csv.append(search_value)
     await ctx.send("imposter ඞ\n{user}: {amount}".format(user=displayname,amount=sus_amount))
 
-@app.command(name="rng",description="Generates a random number from 0 to 1")
-async def rng(ctx : interactions.CommandContext) -> None:
-    rand_number = str(random())
-    await ctx.send(rand_number)
+@slash_command(name="rng",description="Generates a random number from 0 to 1")
+async def rng(ctx : SlashContext) -> None:
+    seed = str(ctx.author.id) + str(ctx.author.nickname)
+    rand = random
+    rand.seed = seed
+    await ctx.send(str(rand.random()))
 
-@app.command(name="flip-coin",description="Flips a Coin")
-async def flip_coin(ctx : interactions.CommandContext,*args) -> None:
-    rand = randrange(0,2)
-    if(rand == 1):
+@slash_command(name="flip-coin",description="Flips a Coin")
+async def flip_coin(ctx : SlashContext,*args) -> None:
+    seed = str(ctx.author.id) + str(ctx.author.nickname)
+    rand = random
+    rand.seed = seed
+    rand_int = int(rand.randrange(0,2))
+    if(rand_int == 1):
         await ctx.send("HEADS")
-    elif (rand == 0):
+    elif (rand_int == 0):
         await ctx.send("TAILS")
 
 """
