@@ -1,9 +1,8 @@
 from os.path import abspath
 import interactions
-from interactions import slash_command, SlashContext
-from random import random, randrange
+from interactions import Client, SlashCommand, slash_command, SlashContext
+import random
 from carl_modules.csv_handler import CSV as CarlCSV
-#from carl_modules.game import Game as CarlGame
 from time import time_ns
 WORKDIR = abspath("./")
 
