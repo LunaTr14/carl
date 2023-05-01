@@ -20,10 +20,6 @@ def get_token() -> str:
 
 app = interactions.Client()
 
-def generate_id() -> str:
-    return str(randrange(99999,999999) * time_ns())[0:6]
-
-
 @slash_command(name="sus",description="IMPOSTER SUS?!??!?!")
 async def sus(ctx : SlashContext) -> None:
     sus_amount = 0
