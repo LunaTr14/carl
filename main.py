@@ -29,14 +29,14 @@ async def sus(ctx : SlashContext) -> None:
     sus_amount = 0
     displayname = ctx.author.username
     discord_id = str(ctx.author.id)
-    search_value = user_csv.search(discord_id)[0]
+    search_value = user_csv.search(discord_id)
     if(len(search_value) <= 0):
-        search_value = [discord_id,"0","0","100","0","0"]
-    sus_amount = int(search_value[1])
+        search_value = [[discord_id,"0","0","100","0","0"]]
+    sus_amount = int(search_value[0][1])
     sus_amount += 1
-    search_value[1] = str(sus_amount)
+    search_value[0][1] = str(sus_amount)
     user_csv.remove_entries_by_id(discord_id)
-    user_csv.append([search_value])
+    user_csv.append(search_value)
     await ctx.send("imposter ඞ\n{user}: {amount}".format(user=displayname,amount=sus_amount))
 
 @app.command(name="rng",description="Generates a random number from 0 to 1")
@@ -52,6 +52,7 @@ async def flip_coin(ctx : interactions.CommandContext,*args) -> None:
     elif (rand == 0):
         await ctx.send("TAILS")
 
+"""
 @app.command(name="fight",description="Fights tagged player",options=[
     interactions.Option(
     name="opponent",
@@ -110,10 +111,10 @@ async def get_score(ctx : interactions.CommandContext, user : interactions.User 
     game_id = user_csv.search(sender_id)[0][2]
     score = game_csv.search(game_id)[0][1]
     await ctx.send(f'{display_name} Score: {score}')
-
+"""
 @interactions.listen()
 async def on_ready():
     print("Bot is Running")
 
 if __name__ == "__main__":
-    app.start()
+    app.start(get_token())
