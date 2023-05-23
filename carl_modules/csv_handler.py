@@ -1,4 +1,4 @@
-from os.path import exists, abspath
+from os.path import exists
 from os import makedirs
 import csv
 class CSV():
@@ -32,40 +32,3 @@ class CSV():
             writer = csv.writer(csv_file,lineterminator="\n")
             writer.writerows(rows)
             csv_file.close()
-   
-    def search(self, query : str) -> list:
-        results = []
-        data = self.read()
-        for row in data:
-            if(query not in results):
-                results.append(row)
-        return results
-
-    def clean_duplicates(self) -> None:
-        data = self.read()
-        results = []
-        for row in data:
-            if(row not in results):
-                results.append(row)
-        self.write(results)
-    
-    def clean_duplicates_by_id(self ,id : str) -> None:
-        data = self.read()
-        results = []
-        first_entry = False # boolean to determine if a single entry of id has already been added to results
-        for row in data:
-            if(not first_entry):
-                results.append(row)
-                first_entry = True
-            elif(row[0] != id):
-                results.append(row)
-        self.write(results)
-    
-    def remove_entries_by_id(self, id : str) -> None:
-        data = self.read()
-        result = []
-        for row in data:
-            print(row)
-            if(len(row) > 0 and row[0] != id):
-                result.append(row)
-        self.write(result)
